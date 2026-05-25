@@ -1,0 +1,41 @@
+{
+  "total": 4,
+  "offset": 0,
+  "data": [
+    {
+      "paperId": "abc123def456",
+      "title": "Full Featured Paper",
+      "abstract": "A complete abstract with all fields present.",
+      "authors": [{"authorId": "1", "name": "Alice Smith"}, {"authorId": "2", "name": "Bob Jones"}],
+      "publicationDate": "2024-03-15",
+      "citationCount": 42,
+      "url": "https://www.semanticscholar.org/paper/abc123def456"
+    },
+    {
+      "paperId": "def456ghi789",
+      "title": "Sparse Fields Paper",
+      "abstract": null,
+      "authors": [],
+      "publicationDate": null,
+      "citationCount": null,
+      "url": null
+    },
+    {
+      "paperId": null,
+      "title": null,
+      "abstract": "Item with null paperId and null title — should be skipped.",
+      "authors": [],
+      "publicationDate": null,
+      "citationCount": 0,
+      "url": null
+    },
+    {
+      "title": "Item Without paperId Key — should be skipped",
+      "abstract": "This item has no paperId key at all.",
+      "authors": [{"authorId": "3", "name": "Dan Brown"}],
+      "publicationDate": "2024-01-01",
+      "citationCount": 5,
+      "url": null
+    }
+  ]
+}

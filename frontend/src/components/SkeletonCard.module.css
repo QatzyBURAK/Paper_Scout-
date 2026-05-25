@@ -1,0 +1,35 @@
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.line {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 25%,
+    var(--color-border-subtle) 50%,
+    var(--color-surface-2) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  /* #4: 1.4s linear → 2.2s ease-in-out */
+  animation: shimmer 2.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.meta { height: 18px; width: 40%; }
+.title { height: 22px; width: 85%; }
+.titleShort { height: 22px; width: 65%; }
+.author { height: 14px; width: 55%; }
+.abs1 { height: 14px; width: 100%; }
+.abs2 { height: 14px; width: 92%; }
+.abs3 { height: 14px; width: 78%; }

@@ -1,0 +1,23 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.arxiv {
+  background: var(--color-arxiv-bg);
+  color: var(--color-arxiv-text);
+}
+
+.ss {
+  background: var(--color-ss-bg);
+  color: var(--color-ss-text);
+}

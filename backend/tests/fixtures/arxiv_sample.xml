@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <id>http://arxiv.org/abs/2401.00001v1</id>
+    <published>2024-01-15T00:00:00Z</published>
+    <title>Attention Is All You Need: A Test Paper</title>
+    <summary>This is a test abstract for the first paper with all fields populated.</summary>
+    <author><name>Alice Smith</name></author>
+    <author><name>Bob Jones</name></author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.00002v1</id>
+    <title>Paper Without Published Date</title>
+    <summary>This paper has no published date element.</summary>
+    <author><name>Carol White</name></author>
+  </entry>
+</feed>
