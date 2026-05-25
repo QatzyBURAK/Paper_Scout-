@@ -31,6 +31,10 @@ chroma_data/
 .antigravitycli/
 .claude/settings.local.json
 
+# Internal / dev notes
+CLAUDE.md
+API.md
+
 # OS
 .DS_Store
 Thumbs.db
