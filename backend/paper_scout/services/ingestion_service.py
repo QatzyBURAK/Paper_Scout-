@@ -51,15 +51,27 @@ class IngestionService:
         sources: Sequence[str] | None = None,
     ) -> IngestionReport:
         since = _since_date(period)
-        # 1) Fetch from selected sources — a single failing fetcher must not abort others
+        # 1) Fetch from selected sources
         all_incoming: list[Paper] = []
+        errors: list[Exception] = []
+        fetched_any = False
+        active_fetchers_count = 0
+
         for f in self._fetchers:
             if sources is not None and f.source_name not in sources:
                 continue
+            active_fetchers_count += 1
             try:
-                all_incoming.extend(f.fetch(query, limit_per_source, since))
+                papers = f.fetch(query, limit_per_source, since)
+                all_incoming.extend(papers)
+                fetched_any = True
             except Exception as exc:
-                logger.warning("Fetcher %s failed, skipping: %s", f.source_name, exc)
+                logger.warning("Fetcher %s failed: %s", f.source_name, exc)
+                errors.append(exc)
+
+        # If all active fetchers failed, propagate the first error to the caller (no silent swallowing)
+        if active_fetchers_count > 0 and not fetched_any and errors:
+            raise errors[0]
 
         # 2) Load existing papers → in-memory dedup index
         with self._factory() as session:

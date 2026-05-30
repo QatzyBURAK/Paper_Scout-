@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 _ENDPOINT = "https://api.semanticscholar.org/graph/v1/paper/search"
 _FIELDS = "paperId,title,abstract,authors,publicationDate,citationCount,url"
-_TIMEOUT = 15.0
+_TIMEOUT = 7.0
 _USER_AGENT = "paper-scout/0.1"
 
 

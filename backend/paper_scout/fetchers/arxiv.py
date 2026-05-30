@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 _ENDPOINT = "https://export.arxiv.org/api/query"
 _NS = "{http://www.w3.org/2005/Atom}"
-_TIMEOUT = 15.0
+_TIMEOUT = 7.0
 _USER_AGENT = "paper-scout/0.1"
 
 

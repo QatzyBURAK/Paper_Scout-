@@ -40,7 +40,7 @@ export function usePaperSearch() {
         err instanceof ApiRequestError
           ? err.message
           : isNetworkError
-            ? "Sunucuya bağlanılamadı — backend çalışıyor mu? (localhost:8000)"
+            ? "Sunucuya bağlanılamadı — backend çalışıyor mu? (127.0.0.1:8001)"
             : "Beklenmeyen bir hata oluştu.";
       setState({ data: null, loading: false, error: message });
     }

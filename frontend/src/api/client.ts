@@ -1,6 +1,6 @@
 import type { Paper, PaperListResponse, IngestRequest, IngestResponse, ApiError } from "../types/paper";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8000";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://127.0.0.1:8001";
 
 export class ApiRequestError extends Error {
   readonly status: number;
