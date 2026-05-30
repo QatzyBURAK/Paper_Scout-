@@ -1,56 +1,62 @@
-# Paper Scout — Kurulum & Sorun Giderme Rehberi
+# 📘 Paper Scout — Installation & Troubleshooting Guide
 
-Bu rehber Paper Scout'u Docker ile **Linux (Ubuntu), Windows ve macOS** üzerinde kurmak için. Hem yeni kuranlara hem de hata aldığında ne yapacağını bilmek isteyenlere yazıldı. Çoğu sorun aşağıdaki "Sık Karşılaşılan Sorunlar" bölümünde çözülmüş — önce oraya bak.
-
-## İçindekiler
-
-1. Önkoşullar
-2. Hızlı başlangıç (3 komut)
-3. İşletim sistemine göre kurulum
-4. Sık karşılaşılan sorunlar
-5. Hızlı debug komutları
-6. Notlar
+This guide is designed to help you install, configure, and troubleshoot Paper Scout using Docker or local environments on **Linux (Ubuntu), Windows, and macOS**. It covers quick starts, platform-specific setups, and solutions to frequently encountered issues.
 
 ---
 
-## 1. Önkoşullar
+## Table of Contents
 
-Tüm OS'ler için ortak:
+1. Prerequisites
+2. Quick Start (3 Commands)
+3. Platform-Specific Installation
+4. Troubleshooting & FAQ
+5. Fast Debugging Commands
+6. Important Architecture Notes
 
-- **Docker** (Engine veya Desktop) + **Docker Compose v2** (`docker compose`, tireli olan değil)
+---
+
+## 1. Prerequisites
+
+Before installing, make sure your system meets the following specifications:
+
+- **Docker** (Engine or Desktop) + **Docker Compose v2** (`docker compose` - with space, not the legacy hyphenated `docker-compose`)
 - **Git**
-- En az **4 GB RAM** boş (sentence-transformers + ChromaDB için), 8 GB önerilen
-- En az **3 GB disk** alanı (image'lar + model + node_modules)
-- İnternet bağlantısı (ilk build sırasında pip/npm/model download için)
+- **Hardware RAM:** At least **4 GB of free RAM** (required for running sentence-transformers embedding model + ChromaDB vector database), 8 GB recommended.
+- **Disk Space:** At least **3 GB of free space** (to download docker images, python dependencies, node modules, and AI models).
+- **Network:** Active internet connection (required on first launch to download libraries and the sentence-transformers model).
 
 ---
 
-## 2. Hızlı başlangıç (her şey hazırsa)
+## 2. Quick Start (Ready in 3 Commands)
+
+If your environment is fully prepared, run these commands to spin up the application:
 
 ```bash
-git clone https://github.com/QatzyBURAK/paper-scout.git
-cd paper-scout
+# 1. Clone the repository
+git clone https://github.com/QatzyBURAK/Paper_Scout-.git
+cd Paper_Scout-
 
-# SQLite tuzağına düşmemek için ÖNCE boş dosyaları yarat (bkz. Sorun #1)
+# 2. Prevent SQLite folder mount issue (highly recommended - see Issue #1)
 touch backend/paper_scout.db
 mkdir -p backend/chroma_data
 
+# 3. Build and run containers
 docker compose up --build
 ```
 
-Bittiğinde:
-- Frontend: <http://localhost:5173>
-- Backend Swagger: <http://localhost:8001/docs>
+Once execution is complete:
+- **Frontend SPA:** <http://localhost:5173>
+- **Backend Swagger API Docs:** <http://localhost:8001/docs>
 
-İlk build **5-15 dakika** sürer (model download dahil). Sonraki açılışlar çok hızlı.
+*Note: The first build can take **5 to 15 minutes** depending on your internet speed, as it downloads base OS images, npm/pip packages, and the Hugging Face AI embedding model. Subsequent launches take less than 5 seconds.*
 
 ---
 
-## 3. İşletim sistemine göre kurulum
+## 3. Platform-Specific Installation
 
 ### 3.1. Linux (Ubuntu 22.04 / Debian)
 
-Docker Engine'i kur (Docker Desktop'a gerek yok):
+Install the Docker Engine directly (Docker Desktop is not required for headless Linux servers):
 
 ```bash
 sudo apt update
@@ -65,296 +71,220 @@ sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-Test:
+Verify installation:
 ```bash
 sudo docker run hello-world
 ```
 
-**Önemli — sudo'suz docker:** Her komutta `sudo` yazmak istemiyorsan (ve VS Code Docker eklentisi/Claude Code MCP gibi araçların çalışması için):
+**Running Docker without sudo (Highly Recommended):**
+To avoid typing `sudo` on every command and to allow tools like VS Code extensions or Claude Code MCP to connect to the daemon:
 
 ```bash
 sudo usermod -aG docker $USER
 newgrp docker
-docker run hello-world   # sudo'suz çalışmalı
+docker run hello-world   # Should run successfully without sudo
 ```
 
-Hâlâ "permission denied" alıyorsan **terminali kapat aç** veya logout/login yap.
+*If you still get permission denied errors, restart your terminal session or log out and log back in.*
 
 ### 3.2. Windows
 
-**Docker Desktop** kur: <https://www.docker.com/products/docker-desktop>
+Install **Docker Desktop**: <https://www.docker.com/products/docker-desktop>
 
-Kurulum sırasında:
-- **WSL2 backend** seçeneğini işaretle (önerilen, daha hızlı).
-- Drive sharing'i etkinleştir (bind mount için gerekli — Settings → Resources → File sharing).
-
-Önemli notlar:
-- Sistem komutlarını **CMD veya PowerShell**'de çalıştır. Ortam değişkeni syntax'ı farklı:
+During installation:
+- **WSL2 Backend:** Ensure the **WSL2 backend** option is checked (significantly faster than Hyper-V).
+- **File Sharing:** Enable Drive Sharing (Settings → Resources → File sharing) to allow bind mounts for databases.
+- Run system commands in **PowerShell or CMD**. Note environment variable differences:
   - CMD: `%USERPROFILE%`
   - PowerShell: `$env:USERPROFILE`
-- Git'i ilk kullanırken `core.autocrlf` ayarı önemli (bkz. Sorun #8).
+- **Line Endings:** Windows git handles line endings with CRLF which can crash inside Linux containers (see Issue #8).
 
 ### 3.3. macOS
 
-**Docker Desktop** kur: <https://www.docker.com/products/docker-desktop>
+Install **Docker Desktop**: <https://www.docker.com/products/docker-desktop>
 
-**Apple Silicon (M1/M2/M3) kullanıcıları DİKKAT:**
-- sentence-transformers + PyTorch arm64 wheel'leri var ama bazı eski sürümler hâlâ amd64-only. Build'de `no matching distribution` veya emülasyon yavaşlığı görürsen, Dockerfile'da Python image'ını `python:3.10-slim` yerine `--platform=linux/amd64` ile zorla, ya da arm64 uyumlu PyTorch sürümünü pin'le.
-- Build sırasında "running under emulation" uyarısı görürsen ilk build çok yavaş olabilir (15-30 dakika).
+**For Apple Silicon (M1/M2/M3) users:**
+- Sentence-transformers and PyTorch have native arm64 wheels, but some sub-dependencies might try to fall back to amd64. If you see `no matching distribution` errors during build, ensure your Docker Desktop has **Rosetta 2 enabled** (Settings → General → Use Rosetta for x86/amd64 emulation).
+- The first build might trigger "running under emulation" warnings and can take up to 20-30 minutes, but it will compile successfully and run with high stability thereafter.
 
 ---
 
-## 4. Sık karşılaşılan sorunlar
+## 4. Troubleshooting & FAQ
 
-### Sorun #1 — `sqlite3.OperationalError: unable to open database file` (EN YAYGIN)
+### Issue #1 — `sqlite3.OperationalError: unable to open database file` (Most Common)
 
-Backend ayağa kalkmıyor, log'da SQLite hatası. Aslında Docker'ın klasik bir tuzağı: `docker-compose.yml` içinde
+**Symptoms:** The backend container fails to start, throwing an SQLite error in the logs.
+**Cause:** This is a classic Docker bind-mount behavior. In `docker-compose.yml`, we mount `./backend/paper_scout.db:/app/paper_scout.db`. If `paper_scout.db` does not exist on your host machine when Docker spins up, **Docker automatically creates it as a directory**. SQLite cannot write to a directory, causing a crash.
 
-```yaml
-- ./backend/paper_scout.db:/app/paper_scout.db
-```
-
-şeklinde bir bind mount var. **Host'ta `paper_scout.db` dosyası yoksa, Docker onu KLASÖR olarak yaratıyor.** SQLite de "klasöre yazamam" diye patlıyor.
-
-**Çözüm:**
-
+**Solution:**
 ```bash
+# 1. Stop containers
 docker compose down
-touch backend/paper_scout.db        # boş dosya yarat
-mkdir -p backend/chroma_data        # Chroma için klasör, varsa dokunmaz
-ls -la backend/paper_scout.db       # çıktı '-rw-...' ile başlamalı (dosya)
-```
 
-Eğer `ls -la` çıktısı `drwx...` ile başlıyorsa **klasör olarak yaratılmış**, sil ve yeniden:
-
-```bash
+# 2. Check if paper_scout.db is a directory
+# On Linux/macOS, a directory starts with 'd' in ls -la. On Windows, check the folder explorer.
+# If it is a folder, delete it:
 rm -rf backend/paper_scout.db
+
+# 3. Create a blank file instead
 touch backend/paper_scout.db
+mkdir -p backend/chroma_data
+
+# 4. Restart containers
 docker compose up
 ```
 
-Bu sorun ilk kurulumda neredeyse herkesin başına gelir.
+---
 
-### Sorun #2 — GitHub clone hatası (`Authentication failed`)
+### Issue #2 — GitHub Clone Fails (`Authentication failed / Password auth not supported`)
 
-```
-remote: Invalid username or token. Password authentication is not supported.
-```
+**Symptoms:** Git fails to clone the repository.
+**Cause:** GitHub has deprecated password authentication in favor of Personal Access Tokens (PAT) or SSH.
 
-GitHub 2021'den beri parola ile auth kabul etmiyor. İki yol:
+**Solutions:**
+- **Quickest Way (Download ZIP):** If it's a public repo, download the zip package directly:
+  ```bash
+  wget https://github.com/QatzyBURAK/Paper_Scout-/archive/refs/heads/main.zip -O paper-scout.zip
+  unzip paper-scout.zip
+  mv Paper_Scout--main paper-scout
+  cd paper-scout
+  ```
+- **Using Personal Access Token (PAT):**
+  1. Go to your GitHub account → Settings → Developer Settings → Personal Access Tokens → Tokens (classic).
+  2. Generate a classic token, checking only the `repo` scope.
+  3. Copy the token (`ghp_...`). When git clone prompts for credentials, enter your regular username and use the token as your password.
 
-**Public repo ise → ZIP indir (en hızlı):**
+---
 
-```bash
-wget https://github.com/QatzyBURAK/paper-scout/archive/refs/heads/main.zip -O paper-scout.zip
-unzip paper-scout.zip
-mv paper-scout-main paper-scout
-cd paper-scout
-```
+### Issue #3 — Port Conflict (`Bind for 0.0.0.0:8001 failed: port already allocated`)
 
-`unzip` yoksa: `sudo apt install unzip -y`. Branch `master` ise URL'de `main` yerine `master` yaz.
+**Symptoms:** Docker fails to bind to port 8001 (backend) or 5173 (frontend).
+**Cause:** Another local process (e.g. an active local python/node instance, or a zombie socket) is occupying the port.
 
-**Private repo ise → Personal Access Token (PAT):**
+**Solution:**
+Identify and terminate the process holding the port:
+* **Linux/macOS:**
+  ```bash
+  sudo lsof -i :8001
+  # Kill the process
+  kill -9 <PID>
+  ```
+* **Windows (PowerShell):**
+  ```powershell
+  netstat -ano | findstr :8001
+  # Kill the process using the PID found
+  taskkill /PID <PID> /F
+  ```
+* *If the system says "Process not found" but netstat still shows it, the socket is in a lingering "zombie" state. A computer reboot will clear it, or you can temporarily modify the port mapping in `docker-compose.yml` (e.g., change `"8001:8001"` to `"8002:8001"`).*
 
-1. <https://github.com/settings/tokens/new> aç
-2. Scopes: yalnızca `repo` kutusunu işaretle
-3. Generate token → `ghp_...` ile başlayan token'ı **kopyala** (bir daha gösterilmez)
-4. `git clone` istediğinde Username = kullanıcı adın, Password = token (paste edince görünmez, normal)
+---
 
-### Sorun #3 — Port çakışması (`Bind for 0.0.0.0:8001 failed: port already allocated`)
+### Issue #4 — `docker compose: command not found`
 
-8001 veya 5173 portu başka bir süreç tarafından tutulmuş. Linux/macOS:
+**Symptoms:** The terminal does not recognize the docker compose command.
+**Cause:** You are running an older Docker version without the v2 compose plugin.
 
-```bash
-sudo lsof -i :8001
-# veya
-sudo ss -tlnp | grep 8001
-```
-
-Windows (PowerShell):
-
-```powershell
-netstat -ano | findstr :8001
-```
-
-Çıkan PID'i öldür:
-- Linux/macOS: `kill -9 <PID>`
-- Windows: `taskkill /PID <PID> /F`
-
-**Zombi soket durumu** (PID listening görünüyor ama `taskkill` "process not found" diyor): süreç ölmüş ama soket lingering state'te. Bilgisayarı yeniden başlatınca temizlenir, ya da **farklı bir port kullan** — `docker-compose.yml`'de `8001:8001` yerine `8002:8001` yap, frontend'in `VITE_API_BASE_URL`'ini de güncelle.
-
-### Sorun #4 — `docker compose: command not found`
-
-Çok eski Docker kurmuşsun, modern v2 plugin yok. Linux'ta:
-
+**Solution:**
+On Linux, install the modern compose plugin:
 ```bash
 sudo apt install -y docker-compose-plugin
 ```
+*Note: Always use the modern **spaced** syntax: `docker compose up`. The hyphenated legacy syntax (`docker-compose`) has been deprecated.*
 
-Windows/macOS Docker Desktop'ta otomatik gelir. **Boşluklu** kullan (`docker compose`), tireli (`docker-compose`) eskidi.
+---
 
-### Sorun #5 — `permission denied while trying to connect to the Docker daemon socket` (Linux)
+### Issue #5 — Sentence-Transformers Model Download Fails or is Extremely Slow
 
-Kullanıcın docker grubunda değil. Çözüm:
+**Symptoms:** The backend hangs or crashes with `HTTPError / Connection refused` during initialization.
+**Cause:** During the first startup, the backend contacts Hugging Face to download the `all-MiniLM-L6-v2` embedding model (~80 MB). If your proxy, firewall, or corporate network restricts Hugging Face, it will fail.
 
-```bash
-sudo usermod -aG docker $USER
-newgrp docker
-```
+**Solutions:**
+- Ensure you have an active network connection on the host machine.
+- If Hugging Face is blocked in your country or network, you can pre-download the model, or use a corporate VPN during the first container build to cache the model in the `hf_cache` Docker volume.
 
-Sonra **terminali kapat ve aç** (newgrp her zaman tetiklemez). Hâlâ alıyorsan logout/login yap. Son çare reboot.
+---
 
-### Sorun #6 — sentence-transformers ilk açılışta çok yavaş veya HATA veriyor
+### Issue #6 — Frontend Shows Blank Screen or "Unable to Connect"
 
-Backend ilk kez ayağa kalkarken `all-MiniLM-L6-v2` modelini indiriyor (~80 MB). Bu ilk build'de **bir kere** olur, sonra cache'lenir.
+**Symptoms:** The frontend loads but displays a "Could not connect to server" error.
+**Cause:** The frontend is pointing to the wrong API address, or a CORS preflight block is triggered.
 
-**Çok yavaş ise:**
-- İnternetin yavaş, normal.
-- Dockerfile'da `--mount=type=cache,target=/root/.cache/huggingface` kullanılıyorsa hızlanır.
+**Solutions:**
+* **CORS Preflight Issue:** The backend CORS middleware only permits allowed origins. Our backend has been fortified with a dynamic regex handler:
+  `allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?"`
+  This allows any local port on your host (e.g. `5173`, `5174`, etc.). If you are running the frontend on a custom remote server, verify that the server's domain is added to `PAPER_SCOUT_CORS_ORIGINS` in your environment variables.
+* **Port / URL Mismatch:** Verify your frontend API environment variable is aligned. In `.env.local` or `.env.example`, make sure it points to:
+  `VITE_API_BASE_URL=http://127.0.0.1:8001`
+  *Always rebuild containers after env changes:* `docker compose down && docker compose up --build`.
 
-**`HTTPError` veya `Connection refused` ise:**
-- Build sırasında ağ yok / kısıtlı (firewall, kurumsal ağ).
-- Çözüm: model'i **build sırasında pre-download** et (Dockerfile'da `RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"`).
+---
 
-### Sorun #7 — Frontend açılıyor ama "Beklenmeyen bir hata" / boş ekran (CORS veya wrong URL)
+### Issue #7 — Windows Line Endings Break Container Scripts (`/bin/sh^M: not found`)
 
-Frontend backend'e bağlanamıyor. Tarayıcı DevTools → Console + Network sekmesine bak:
+**Symptoms:** Shell scripts fail to execute in containers with weird syntax errors.
+**Cause:** Windows automatically converts Linux line endings (`LF`) to Windows carriage returns (`CRLF`). Linux containers do not accept carriage returns.
 
-- **CORS hatası**: Backend'in CORS allowed origins'inde frontend'in URL'i yok. `paper_scout/api/app.py` (veya app create dosyası) içinde CORS middleware'i kontrol et — `http://localhost:5173` izinli olmalı.
-- **404 / Connection refused**: Frontend yanlış porta gidiyor. `frontend/.env.local` veya `frontend/.env` içinde:
-  ```
-  VITE_API_BASE_URL=http://localhost:8001
-  ```
-  yazıyor mu? **Env değişikliğinden sonra `docker compose down && docker compose up --build`** — Vite env'i sadece başlangıçta okur.
-- **Docker compose internal network**: Frontend container'dan backend container'a gidiyorsa, `localhost` değil **service name** kullan (`http://backend:8001`). `docker-compose.yml`'deki servis ismine bak.
-
-### Sorun #8 — Windows'ta line ending sorunları (`/bin/sh^M: not found` veya shell script bozuk)
-
-Git Windows'ta dosyaları CRLF olarak çekiyor, Linux container'ı CRLF'i sevmiyor.
-
+**Solution:**
+Configure Git to check out files keeping their native line endings, then **delete and re-clone** the repository:
 ```bash
 git config --global core.autocrlf input
-```
-
-Sonra repo'yu **yeniden klonla** (eski klon zaten CRLF'le çekildi, düzelmez):
-
-```bash
 cd ..
-rm -rf paper-scout
-git clone https://github.com/QatzyBURAK/paper-scout.git
+rm -rf Paper_Scout-
+git clone https://github.com/QatzyBURAK/Paper_Scout-.git
 ```
-
-Veya tek dosya bazında düzeltmek istersen `dos2unix script.sh`.
-
-### Sorun #9 — Volume persistence kaybı (her restart'ta DB sıfırlanıyor)
-
-`docker compose down` yaptın, makaleler uçtu. Bunun iki sebebi var:
-
-1. **`-v` flag'i ile down ettin** (`docker compose down -v`) — bu **named volume'leri siler.** Sadece `docker compose down` kullan, `-v` kasten temizleme istemediğin sürece.
-2. **Volume tanımı yanlış** — `docker-compose.yml`'de SQLite ve ChromaDB için bind mount veya named volume tanımlı olmalı. Kontrol et:
-   ```yaml
-   volumes:
-     - ./backend/paper_scout.db:/app/paper_scout.db
-     - ./backend/chroma_data:/app/chroma_data
-   ```
-   Bu satırlar yoksa veri container ölünce gider.
-
-Test: ingest et → `docker compose down` (`-v` OLMADAN) → `docker compose up` → makaleler hâlâ olmalı.
-
-### Sorun #10 — Apple Silicon (M1/M2/M3): build sırasında `no matching distribution` veya çok yavaş emülasyon
-
-Bazı Python paketleri (özellikle eski PyTorch sürümleri) arm64 wheel'ı yok. Üç seçenek:
-
-**A) Image'ı amd64 olarak zorla** (emülasyonda çalışır, biraz yavaş ama uyumlu):
-```dockerfile
-FROM --platform=linux/amd64 python:3.10-slim
-```
-
-**B) arm64 uyumlu sürümleri pin'le** (en iyisi ama biraz uğraş): `requirements.txt`'te PyTorch 2.x sürümü kullan, ML paketlerini arm64 destekli sürümlere güncelle.
-
-**C) Build'de uyarıları görmezden gel**: "running under emulation" warning'i sadece uyarı, build tamamlanırsa sorun yok — sadece ilk build daha uzun.
-
-### Sorun #11 — Build context çok büyük (`Sending build context ... 2 GB`)
-
-`.dockerignore` eksik veya yetersiz. Repo'da `.dockerignore` olmalı, içinde en azından:
-
-```
-node_modules
-.venv
-__pycache__
-*.pyc
-.git
-.chroma
-*.db
-.env.local
-.DS_Store
-```
-
-Bu olmadan `node_modules` ve `.venv` her build'de Docker'a kopyalanır → 1-2 GB context, build çok yavaş.
-
-### Sorun #12 — `docker compose up` çalışıyor ama kod değişiklikleri yansımıyor
-
-Bind mount eksik veya backend `--reload` ile başlamıyor. `docker-compose.yml`'de backend servisinde:
-
-```yaml
-volumes:
-  - ./backend:/app
-command: uvicorn paper_scout.api.app:create_app --factory --host 0.0.0.0 --port 8001 --reload
-```
-
-olmalı. **`--reload` olmadan** dosya değişikliğinde restart gerekir.
-
-Aynı şekilde frontend için Vite zaten hot-reload yapıyor ama bind mount lazım:
-
-```yaml
-volumes:
-  - ./frontend:/app
-  - /app/node_modules
-```
-
-İkinci satır (`/app/node_modules`) host'taki `node_modules`'un container'dakini ezmesini önler.
-
-### Sorun #13 — Tarayıcı eski sürümü gösteriyor (frontend rebuild olmuş ama görünmüyor)
-
-Vite hot-reload sonrası nadiren cache takılır. Çözüm: **`Ctrl+Shift+R`** (hard refresh) veya DevTools açıkken Network → "Disable cache".
 
 ---
 
-## 5. Hızlı debug komutları
+### Issue #8 — Ingestion Returns "Time Out / 504 Gateway Timeout" or "429 Too Many Requests"
+
+**Symptoms:** Ingesting papers throws a 504 Gateway Timeout or 429 Too Many Requests.
+**Cause:** 
+- **429 (Rate Limits):** Academic APIs like Semantic Scholar or arXiv have strict rate limits. If too many queries are sent, they temporarily block your IP.
+- **504 (Timeouts):** If the external APIs are busy, they take too long to respond.
+- **Resilient Ingestion Engine:** We have engineered a highly robust **Resilient Ingestion Engine**.
+  - **Single Source Failure:** If you check both arXiv and Semantic Scholar, and one fails (e.g. arXiv times out or Semantic Scholar is rate-limited), **the backend continues and successfully ingests papers from the working service!**
+  - **Fail-Fast:** We reduced the maximum request timeout from **15.0 seconds to 7.0 seconds** to prevent browser gateway timeouts.
+  - **All-Source Failure:** If all selected services fail (absolute zero papers fetched), the system raises a clear, localized Turkish error explaining the situation so you are never left with silent failures. Simply wait 1-2 minutes and try again.
+
+---
+
+## 5. Fast Debugging Commands
+
+Use these handy terminal commands to debug the state of your Docker containers:
 
 ```bash
-# Container'lar ayakta mı, ne durumda?
+# Check if containers are active and healthy
 docker compose ps
 
-# Log'lar (tüm servisler)
+# View live consolidated logs (all services)
 docker compose logs -f
 
-# Sadece backend log'u
+# View live logs for backend only
 docker compose logs -f backend
 
-# Container'ın içine gir
+# Open an interactive shell inside the backend container
 docker compose exec backend bash
-docker compose exec frontend sh
 
-# Backend'in /papers endpoint'i doğru mu cevap veriyor?
+# Test if the API endpoint responds directly
 curl "http://localhost:8001/papers?limit=2&offset=0"
-# Beklenen: {"items":[...],"total":N,"limit":2,"offset":0}
 
-# Container'ları durdur ve sil (veri kalsın)
+# Stop containers safely (preserving all data)
 docker compose down
 
-# TEMİZ başlangıç (veri DAHİL siler)
+# Hard Reset (Wipes containers and all volume cache - useful for clean test)
 docker compose down -v
-docker system prune -af   # tüm kullanılmayan image/cache'i siler, dikkat
+docker system prune -af
 ```
 
 ---
 
-## 6. Notlar
+## 6. Important Architecture Notes
 
-- Backend portu **8001**, frontend portu **5173**. Bunları değiştirirsen `docker-compose.yml` + frontend'in `.env.local`'i + backend'in CORS allowed origins'i — üçünü birden güncelle, yoksa bağlanamaz.
-- Python sürümü **3.10** sabit, 3.11+ değil. Image değiştirmek istersen Dockerfile'da `python:3.10-slim` satırını koru.
-- ChromaDB ve SQLite verisi **`./backend/`** altında — repo dışına yedek almak istersen bu klasörü kopyala.
-- "Bende çalışıyor" testi için: `docker compose down -v && docker compose up --build` ile sıfırdan kurup tüm akışları (arama, ingest, gözat, detay) gerçekten dene. Volume persistence için ingest et, sonra `docker compose down` (`-v` OLMADAN) + `up` → veri durmalı.
+- **Ports:** Backend listens on port **8001**. Frontend listens on port **5173**. If you map these to different ports on the host, ensure they are updated in `docker-compose.yml`, `frontend/.env.local`, and backend CORS configurations simultaneously.
+- **Python Version:** Locked strictly to **Python 3.10** to guarantee package and strict linter compatibility.
+- **Database Path:** Local database files are saved in the `./backend/` directory on your host. Backup this folder if you want to export your ingested database.
+- **Verification Test:** To perform a complete clean slate verification, run:
+  `docker compose down -v && docker compose up --build`
+  Ingest a few papers, run `docker compose down` (without the `-v` flag), and boot again. Your data must be perfectly persistent.
 
-Daha fazla sorun çıkarsa GitHub issue aç veya bu rehbere yeni bir Sorun #X ekle.
+*If you encounter any other edge cases, feel free to open a GitHub Issue or add your findings to this GUIDE.*
