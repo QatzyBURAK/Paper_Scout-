@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -15,6 +13,8 @@ services:
       - PAPER_SCOUT_DB_URL=sqlite:///paper_scout.db
       - PAPER_SCOUT_CHROMA_PATH=./chroma_data
       - PAPER_SCOUT_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      # Chroma telemetrisi kodda da kapalı; bu ikinci bir güvence.
+      - ANONYMIZED_TELEMETRY=False
 
   frontend:
     build:

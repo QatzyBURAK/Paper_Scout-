@@ -21,11 +21,17 @@ const SOURCES: { value: Source; label: string }[] = [
   { value: "semantic_scholar", label: "Semantic Scholar" },
 ];
 
+// Kaynak başına çekilecek makale sayısı.
+// Üst sınır backend'deki IngestRequest.limit_per_source ile aynı (ge=1, le=50).
+const LIMITS = [10, 25, 50] as const;
+const DEFAULT_LIMIT = 25;
+
 export function IngestPanel() {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState<Period>("all");
+  const [limit, setLimit] = useState<number>(DEFAULT_LIMIT);
   const [sources, setSources] = useState<Set<Source>>(new Set(["arxiv", "semantic_scholar"]));
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<IngestResponse | null>(null);
@@ -55,7 +61,7 @@ export function IngestPanel() {
         sources.size === 2 ? undefined : (Array.from(sources) as Source[]);
       const res = await fetchPapers({
         query: query.trim(),
-        limit_per_source: 25,
+        limit_per_source: limit,
         ...(period !== "all" ? { period } : {}),
         ...(sourcesParam ? { sources: sourcesParam } : {}),
       });
@@ -115,6 +121,19 @@ export function IngestPanel() {
                   onClick={() => setPeriod(value)}
                 >
                   {t(labelKey)}
+                </button>
+              ))}
+            </div>
+            <div className={styles.periodGroup} role="group" aria-label={t("ingest.limitLabel")}>
+              {LIMITS.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.periodBtn} ${limit === value ? styles.periodActive : ""}`}
+                  aria-pressed={limit === value}
+                  onClick={() => setLimit(value)}
+                >
+                  {value}
                 </button>
               ))}
             </div>

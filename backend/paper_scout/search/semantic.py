@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
 import chromadb
+from chromadb.config import Settings as ChromaSettings
 
 from paper_scout.models import Paper
 from paper_scout.search.embeddings import Embedder
@@ -29,7 +31,21 @@ class VectorStore:
         collection_name: str,
         embedder: Embedder,
     ) -> VectorStore:
-        client = chromadb.PersistentClient(path=str(chroma_path))
+        # Chroma varsayılan olarak kullanım telemetrisini dışarı gönderir.
+        # Paper Scout tamamen yerel çalışan bir araç; kullanıcının makinesinden
+        # habersiz veri çıkmasın diye kapatıyoruz. Bu ayar posthog.disabled=True
+        # yapar, yani hiçbir olay gönderilmez.
+        #
+        # Ayrıca chromadb 0.5.x ile posthog 7.x arasındaki imza uyuşmazlığı
+        # yüzünden Chroma her olayda "Failed to send telemetry event ..." satırı
+        # basıyor. Gönderim zaten kapalı; bu log yalnızca gürültü ve okuyanda
+        # "veri gidiyor mu?" şüphesi bırakıyor — o yüzden susturuyoruz.
+        logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
+
+        client = chromadb.PersistentClient(
+            path=str(chroma_path),
+            settings=ChromaSettings(anonymized_telemetry=False),
+        )
         collection = client.get_or_create_collection(
             name=collection_name,
             metadata={"hnsw:space": "cosine"},

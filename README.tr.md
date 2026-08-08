@@ -154,4 +154,21 @@ mypy paper_scout tests --strict
 ```
 
 ---
+
+## 📚 Veri Kaynakları ve Atıf
+
+Paper Scout künye bilgilerini iki halka açık akademik API'den çeker:
+
+* **arXiv** — [arXiv API](https://info.arxiv.org/help/api/index.html) üzerinden. Açık erişim altyapısını kullanıma sunduğu için arXiv'e teşekkür ederiz. İstekler, [arXiv API Kullanım Şartları](https://info.arxiv.org/help/api/tou.html) gereği en fazla 3 saniyede bir olacak şekilde sınırlandırılmıştır.
+* **Semantic Scholar** — [Academic Graph API](https://api.semanticscholar.org/) üzerinden. Kimlik doğrulamasız istekler ağır şekilde sınırlandırılmıştır; API `429` dönerse Paper Scout uyarı kaydeder ve tüm işlemi başarısız saymak yerine diğer kaynaklarla devam eder.
+
+Makale başlıkları, özetleri ve yazar adları ilgili yazar ve yayıncılara aittir. Paper Scout bu künyeleri **yalnızca yerel veritabanında** (`backend/paper_scout.db`) tutar; bu dosya `.gitignore`'dadır ve depoyla birlikte dağıtılmaz. Her kullanıcı kendi verisini kendisi çeker.
+
+## 🔒 Gizlilik
+
+Paper Scout tamamen kendi makinenizde çalışır. Hesap yok, analitik yok; yukarıdaki iki akademik API ve gömme modelinin Hugging Face'ten tek seferlik indirilmesi dışında dışarıya hiçbir çağrı yapılmaz.
+
+ChromaDB varsayılan olarak anonim kullanım telemetrisi toplar; Paper Scout bunu `backend/paper_scout/search/semantic.py` içinde **açıkça kapatır**, böylece makinenizden haberiniz olmadan veri çıkmaz.
+
+---
 *Bu çalışma, modern bilgi erişim (information retrieval) tekniklerini hem arka planda hem de ön yüzde en sade, performanslı ve kararlı haliyle bir araya getiren uçtan uca çalışan bir akademik arama motoru projesidir.*

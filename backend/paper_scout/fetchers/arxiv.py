@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import threading
+import time
 import xml.etree.ElementTree as ET
 from datetime import date
 
@@ -16,6 +18,10 @@ _NS = "{http://www.w3.org/2005/Atom}"
 _TIMEOUT = 7.0
 _USER_AGENT = "paper-scout/0.1"
 
+# arXiv API Terms of Use: en fazla 3 saniyede bir istek.
+# https://info.arxiv.org/help/api/tou.html
+_MIN_REQUEST_INTERVAL = 3.0
+
 
 def _make_client() -> httpx.Client:
     return httpx.Client(timeout=_TIMEOUT, headers={"User-Agent": _USER_AGENT})
@@ -24,11 +30,40 @@ def _make_client() -> httpx.Client:
 class ArxivFetcher:
     source_name: str = "arxiv"
 
-    def __init__(self, client: httpx.Client | None = None) -> None:
-        self._client = client if client is not None else _make_client()
+    def __init__(
+        self,
+        client: httpx.Client | None = None,
+        min_interval: float | None = None,
+    ) -> None:
+        owns_client = client is None
+        self._client = _make_client() if owns_client else client
+        # Kendi istemcimizi kurduysak arXiv'in istek aralığı kuralına uyarız.
+        # İstemci dışarıdan enjekte edildiyse (testler, özel transport) davranışı
+        # çağırana bırakırız — min_interval ile açıkça istenebilir.
+        if min_interval is None:
+            min_interval = _MIN_REQUEST_INTERVAL if owns_client else 0.0
+        self._min_interval = min_interval
+        self._last_request_at = 0.0
+        self._throttle_lock = threading.Lock()
 
     def close(self) -> None:
         self._client.close()
+
+    def _throttle(self) -> None:
+        """Ardışık istekler arasında en az _min_interval saniye bırakır.
+
+        Normal kullanımda (kullanıcı arayüzden tek tek makale çeker) hiç
+        beklemez; yalnızca istekler arka arkaya gelirse devreye girer.
+        """
+        if self._min_interval <= 0:
+            return
+        with self._throttle_lock:
+            elapsed = time.monotonic() - self._last_request_at
+            wait = self._min_interval - elapsed
+            if wait > 0:
+                logger.debug("arXiv istek aralığı için %.2f sn bekleniyor", wait)
+                time.sleep(wait)
+            self._last_request_at = time.monotonic()
 
     def fetch(self, query: str, limit: int, since: date | None = None) -> list[Paper]:
         if not query:
@@ -45,6 +80,7 @@ class ArxivFetcher:
             params["sortBy"] = "submittedDate"
             params["sortOrder"] = "descending"
 
+        self._throttle()
         response = self._client.get(_ENDPOINT, params=params)
         response.raise_for_status()
 

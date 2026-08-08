@@ -161,6 +161,23 @@ mypy paper_scout tests --strict
 ```
 
 ---
-For a complete guide on deep-dive configurations, platform-specific steps, and comprehensive troubleshooting, refer to [GUIDE.md](file:///C:/Users/Burak/Desktop/new_codes/paper_scout/GUIDE.md) / [GUIDE.tr.md](file:///C:/Users/Burak/Desktop/new_codes/paper_scout/GUIDE.tr.md).
+
+## 📚 Data Sources & Attribution
+
+Paper Scout retrieves metadata from two public academic APIs:
+
+* **arXiv** — via the [arXiv API](https://info.arxiv.org/help/api/index.html). Thank you to arXiv for use of its open access interoperability. Requests are rate-limited to one every three seconds in accordance with the [arXiv API Terms of Use](https://info.arxiv.org/help/api/tou.html).
+* **Semantic Scholar** — via the [Academic Graph API](https://api.semanticscholar.org/). Unauthenticated requests are heavily rate-limited; if the API returns `429`, Paper Scout logs a warning and continues with the remaining sources rather than failing the whole ingestion.
+
+Paper titles, abstracts, and author names remain the property of their respective authors and publishers. Paper Scout stores this metadata **only in your local database** (`backend/paper_scout.db`), which is git-ignored and never distributed with this repository. Each user fetches their own data.
+
+## 🔒 Privacy
+
+Paper Scout runs entirely on your machine. There are no accounts, no analytics, and no outbound calls other than the two academic APIs above and the one-time download of the embedding model from Hugging Face.
+
+ChromaDB collects anonymous usage telemetry by default; Paper Scout **disables it explicitly** in `backend/paper_scout/search/semantic.py` so that nothing leaves your machine without your knowledge.
+
+---
+For a complete guide on deep-dive configurations, platform-specific steps, and comprehensive troubleshooting, refer to [GUIDE.md](GUIDE.md) / [GUIDE.tr.md](GUIDE.tr.md).
 
 *Paper Scout provides a minimal, modern, highly performant, and robust toolchain bringing state-of-the-art information retrieval to academic literature search.*
