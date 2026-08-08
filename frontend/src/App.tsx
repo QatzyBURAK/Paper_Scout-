@@ -2,9 +2,14 @@ import { BrowserRouter, Routes, Route, NavLink, Link } from "react-router-dom";
 import "./index.css";
 import { HomePage } from "./pages/HomePage";
 import { BrowsePage } from "./pages/BrowsePage";
+import { ThemeSwitcher } from "./components/ThemeSwitcher";
+import { LanguageSwitcher } from "./components/LanguageSwitcher";
+import { useI18n } from "./i18n/context";
 import styles from "./App.module.css";
 
 export default function App() {
+  const { t } = useI18n();
+
   return (
     <BrowserRouter>
       <div className={styles.app}>
@@ -16,15 +21,19 @@ export default function App() {
               end
               className={({ isActive }) => isActive ? styles.navActive : styles.navLink}
             >
-              Ara
+              {t("nav.search")}
             </NavLink>
             <NavLink
               to="/browse"
               className={({ isActive }) => isActive ? styles.navActive : styles.navLink}
             >
-              Gözat
+              {t("nav.browse")}
             </NavLink>
           </nav>
+          <div className={styles.headerEnd}>
+            <LanguageSwitcher />
+            <ThemeSwitcher />
+          </div>
         </header>
         <main className={styles.main}>
           <Routes>

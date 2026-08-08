@@ -7,24 +7,24 @@ import { EmptyState } from "../components/EmptyState";
 import { IngestPanel } from "../components/IngestPanel";
 import { PaperDetailModal } from "../components/PaperDetailModal";
 import type { Paper } from "../types/paper";
+import { useI18n } from "../i18n/context";
 import styles from "./HomePage.module.css";
 
 export function HomePage() {
+  const { t } = useI18n();
   const { data, loading, error, search, retry } = usePaperSearch();
   const [selected, setSelected] = useState<Paper | null>(null);
 
   return (
     <div className={styles.page}>
       <section className={styles.searchSection}>
-        <h1 className={styles.heading}>Araştırma Makalesi Keşfi</h1>
-        <p className={styles.sub}>
-          arXiv ve Semantic Scholar'dan keyword, semantic ve hybrid arama ile makale bul.
-        </p>
+        <h1 className={styles.heading}>{t("home.heading")}</h1>
+        <p className={styles.sub}>{t("home.sub")}</p>
         <SearchBar onSubmit={search} loading={loading} />
         <IngestPanel />
       </section>
 
-      <section aria-live="polite" aria-label="Search results">
+      <section aria-live="polite" aria-label={t("home.resultsLabel")}>
         {loading && (
           <div className={styles.skeletonList}>
             {Array.from({ length: 4 }).map((_, i) => (

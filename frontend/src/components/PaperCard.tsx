@@ -1,6 +1,7 @@
 import type { Paper } from "../types/paper";
 import { SourceBadge } from "./SourceBadge";
 import { formatDate } from "../lib/formatDate";
+import { useI18n } from "../i18n/context";
 import styles from "./PaperCard.module.css";
 
 const MAX_AUTHORS = 3;
@@ -11,10 +12,11 @@ interface Props {
 }
 
 export function PaperCard({ paper, onSelect }: Props) {
-  const date = formatDate(paper.published_date);
+  const { t, locale } = useI18n();
+  const date = formatDate(paper.published_date, locale);
   const visibleAuthors = paper.authors.slice(0, MAX_AUTHORS).join(", ");
   const extraAuthors = paper.authors.length - MAX_AUTHORS;
-  const citations = paper.citation_count.toLocaleString("en-US");
+  const citations = paper.citation_count.toLocaleString(locale);
 
   return (
     <article className={styles.card}>
@@ -23,7 +25,7 @@ export function PaperCard({ paper, onSelect }: Props) {
           type="button"
           className={styles.overlayBtn}
           onClick={() => onSelect(paper)}
-          aria-label={`${paper.title} detaylarını aç`}
+          aria-label={t("card.openDetails", { title: paper.title })}
         />
       )}
 
@@ -33,7 +35,10 @@ export function PaperCard({ paper, onSelect }: Props) {
         <p className={styles.authors}>
           {visibleAuthors}
           {extraAuthors > 0 && (
-            <span className={styles.moreAuthors}> +{extraAuthors} more</span>
+            <span className={styles.moreAuthors}>
+              {" "}
+              {t("card.moreAuthors", { count: extraAuthors })}
+            </span>
           )}
         </p>
       )}
@@ -45,7 +50,7 @@ export function PaperCard({ paper, onSelect }: Props) {
       <div className={styles.meta}>
         <SourceBadge source={paper.source} />
         {date && <span className={styles.metaText}>{date}</span>}
-        <span className={styles.metaText}>{citations} citations</span>
+        <span className={styles.metaText}>{t("card.citations", { count: citations })}</span>
       </div>
     </article>
   );

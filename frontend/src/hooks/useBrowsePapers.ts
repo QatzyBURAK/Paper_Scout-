@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { listPapers, ApiRequestError } from "../api/client";
 import type { Paper } from "../types/paper";
+import { useI18n } from "../i18n/context";
 
 const PAGE_SIZE = 20;
 
@@ -13,6 +14,7 @@ interface State {
 }
 
 export function useBrowsePapers() {
+  const { t } = useI18n();
   const [state, setState] = useState<State>({
     items: [],
     total: null,
@@ -57,13 +59,13 @@ export function useBrowsePapers() {
           err instanceof ApiRequestError
             ? err.message
             : isNetwork
-              ? "Sunucuya bağlanılamadı."
-              : "Beklenmeyen bir hata oluştu.",
+              ? t("error.network")
+              : t("error.unexpected"),
       }));
     } finally {
       fetchingRef.current = false;
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (didInitRef.current) return;

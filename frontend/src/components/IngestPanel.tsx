@@ -2,23 +2,27 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchPapers, ApiRequestError } from "../api/client";
 import type { IngestResponse } from "../types/paper";
+import { useI18n } from "../i18n/context";
+import type { MessageKey } from "../i18n/translations";
 import styles from "./IngestPanel.module.css";
 
 type Period = "all" | "month" | "week";
 type Source = "arxiv" | "semantic_scholar";
 
-const PERIODS: { value: Period; label: string }[] = [
-  { value: "all", label: "Tümü" },
-  { value: "month", label: "Son 1 ay" },
-  { value: "week", label: "Son 1 hafta" },
+const PERIODS: { value: Period; labelKey: MessageKey }[] = [
+  { value: "all", labelKey: "ingest.period.all" },
+  { value: "month", labelKey: "ingest.period.month" },
+  { value: "week", labelKey: "ingest.period.week" },
 ];
 
+// Kaynak adları marka — her iki dilde de aynı kalıyor.
 const SOURCES: { value: Source; label: string }[] = [
   { value: "arxiv", label: "arXiv" },
   { value: "semantic_scholar", label: "Semantic Scholar" },
 ];
 
 export function IngestPanel() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState<Period>("all");
@@ -62,8 +66,8 @@ export function IngestPanel() {
         err instanceof ApiRequestError
           ? err.message
           : isNetworkError
-            ? "Sunucuya bağlanılamadı."
-            : "Beklenmeyen bir hata oluştu.",
+            ? t("error.network")
+            : t("error.unexpected"),
       );
     } finally {
       setLoading(false);
@@ -78,7 +82,7 @@ export function IngestPanel() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        <span className={styles.toggleLabel}>↓ Yeni makale çek</span>
+        <span className={styles.toggleLabel}>{t("ingest.toggle")}</span>
         <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}>▾</span>
       </button>
 
@@ -96,13 +100,13 @@ export function IngestPanel() {
             <input
               className={styles.input}
               type="text"
-              placeholder="Konu — örn. vision language model"
+              placeholder={t("ingest.placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") void handleFetch(); }}
             />
-            <div className={styles.periodGroup} role="group" aria-label="Dönem">
-              {PERIODS.map(({ value, label }) => (
+            <div className={styles.periodGroup} role="group" aria-label={t("ingest.periodLabel")}>
+              {PERIODS.map(({ value, labelKey }) => (
                 <button
                   key={value}
                   type="button"
@@ -110,7 +114,7 @@ export function IngestPanel() {
                   aria-pressed={period === value}
                   onClick={() => setPeriod(value)}
                 >
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>
@@ -121,12 +125,12 @@ export function IngestPanel() {
               onClick={() => void handleFetch()}
             >
               {loading && <span className={styles.spinner} aria-hidden="true" />}
-              {loading ? "Çekiliyor…" : "Çek"}
+              {loading ? t("ingest.fetching") : t("ingest.fetch")}
             </button>
           </div>
 
           <div className={styles.sourceRow}>
-            <div className={styles.sourceGroup} role="group" aria-label="Kaynak">
+            <div className={styles.sourceGroup} role="group" aria-label={t("ingest.sourceLabel")}>
               {SOURCES.map(({ value, label }) => {
                 const active = sources.has(value);
                 const activeClass =
@@ -145,13 +149,17 @@ export function IngestPanel() {
               })}
             </div>
             {noSourceSelected && (
-              <span className={styles.sourceWarning}>En az bir kaynak seçilmeli</span>
+              <span className={styles.sourceWarning}>{t("ingest.noSource")}</span>
             )}
           </div>
 
           {result && (
             <p className={styles.result}>
-              {result.fetched} çekildi · {result.saved} eklendi · {result.merged} güncellendi
+              {t("ingest.result", {
+                fetched: result.fetched,
+                saved: result.saved,
+                merged: result.merged,
+              })}
             </p>
           )}
           {error && (

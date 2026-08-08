@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type KeyboardEvent } from "react";
 import type { SearchMode } from "../types/paper";
 import { ModeSelector } from "./ModeSelector";
+import { useI18n } from "../i18n/context";
 import styles from "./SearchBar.module.css";
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function SearchBar({ onSubmit, loading }: Props) {
+  const { t } = useI18n();
   const [q, setQ] = useState("");
   const [mode, setMode] = useState<SearchMode>("hybrid");
 
@@ -33,11 +35,11 @@ export function SearchBar({ onSubmit, loading }: Props) {
         <input
           className={styles.input}
           type="search"
-          placeholder="Ara — örn. transformer attention, graph neural networks…"
+          placeholder={t("search.placeholder")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={handleKeyDown}
-          aria-label="Search query"
+          aria-label={t("search.ariaLabel")}
           autoFocus
         />
         <button
@@ -46,7 +48,7 @@ export function SearchBar({ onSubmit, loading }: Props) {
           disabled={loading || q.trim().length === 0}
         >
           {loading ? <span className={styles.spinner} aria-hidden="true" /> : null}
-          {loading ? "Aranıyor…" : "Ara"}
+          {loading ? t("search.submitting") : t("search.submit")}
         </button>
       </div>
       <ModeSelector value={mode} onChange={setMode} />

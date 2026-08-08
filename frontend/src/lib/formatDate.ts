@@ -1,12 +1,21 @@
-const fmt = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
+const cache = new Map<string, Intl.DateTimeFormat>();
 
-export function formatDate(iso: string | null): string | null {
+function formatter(locale: string): Intl.DateTimeFormat {
+  let fmt = cache.get(locale);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+    cache.set(locale, fmt);
+  }
+  return fmt;
+}
+
+export function formatDate(iso: string | null, locale = "en-GB"): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (isNaN(d.getTime())) return null;
-  return fmt.format(d);
+  return formatter(locale).format(d);
 }

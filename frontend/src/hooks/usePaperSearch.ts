@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { searchPapers, ApiRequestError } from "../api/client";
 import type { Paper, SearchMode } from "../types/paper";
+import { useI18n } from "../i18n/context";
 
 interface SearchState {
   data: Paper[] | null;
@@ -14,6 +15,7 @@ interface LastQuery {
 }
 
 export function usePaperSearch() {
+  const { t } = useI18n();
   const [state, setState] = useState<SearchState>({
     data: null,
     loading: false,
@@ -40,11 +42,11 @@ export function usePaperSearch() {
         err instanceof ApiRequestError
           ? err.message
           : isNetworkError
-            ? "Sunucuya bağlanılamadı — backend çalışıyor mu? (127.0.0.1:8001)"
-            : "Beklenmeyen bir hata oluştu.";
+            ? t("error.networkSearch")
+            : t("error.unexpected");
       setState({ data: null, loading: false, error: message });
     }
-  }, []);
+  }, [t]);
 
   const search = useCallback(
     (q: string, mode: SearchMode) => { void run(q, mode); },

@@ -1,6 +1,8 @@
 import type { SearchMode } from "../types/paper";
+import { useI18n } from "../i18n/context";
 import styles from "./ModeSelector.module.css";
 
+// Mod adları teknik terim — her iki dilde de İngilizce kalıyor.
 const MODES: { value: SearchMode; label: string }[] = [
   { value: "keyword", label: "Keyword" },
   { value: "semantic", label: "Semantic" },
@@ -13,8 +15,10 @@ interface Props {
 }
 
 export function ModeSelector({ value, onChange }: Props) {
+  const { t } = useI18n();
+
   return (
-    <div className={styles.group} role="group" aria-label="Search mode">
+    <div className={styles.group} role="group" aria-label={t("mode.groupLabel")}>
       {MODES.map(({ value: mode, label }) => (
         <button
           key={mode}

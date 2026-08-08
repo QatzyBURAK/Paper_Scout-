@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Paper } from "../types/paper";
 import { SourceBadge } from "./SourceBadge";
 import { formatDate } from "../lib/formatDate";
+import { useI18n } from "../i18n/context";
+import type { MessageKey } from "../i18n/translations";
 import styles from "./PaperDetailModal.module.css";
 
 interface Props {
@@ -10,12 +12,13 @@ interface Props {
   onClose: () => void;
 }
 
-const sourceLabel: Record<Paper["source"], string> = {
-  arxiv: "arXiv'de Aç",
-  semantic_scholar: "Semantic Scholar'da Aç",
+const sourceLabelKey: Record<Paper["source"], MessageKey> = {
+  arxiv: "modal.openArxiv",
+  semantic_scholar: "modal.openSs",
 };
 
 export function PaperDetailModal({ paper, onClose }: Props) {
+  const { t, locale } = useI18n();
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -33,8 +36,8 @@ export function PaperDetailModal({ paper, onClose }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const citations = paper?.citation_count.toLocaleString("en-US");
-  const date = paper ? formatDate(paper.published_date) : null;
+  const citations = paper?.citation_count.toLocaleString(locale);
+  const date = paper ? formatDate(paper.published_date, locale) : null;
   const titleId = "modal-title";
 
   return (
@@ -64,7 +67,7 @@ export function PaperDetailModal({ paper, onClose }: Props) {
               type="button"
               className={styles.closeX}
               onClick={onClose}
-              aria-label="Kapat"
+              aria-label={t("modal.close")}
             >
               ×
             </button>
@@ -72,7 +75,9 @@ export function PaperDetailModal({ paper, onClose }: Props) {
             <div className={styles.meta}>
               <SourceBadge source={paper.source} />
               {date && <span className={styles.metaText}>{date}</span>}
-              <span className={styles.metaText}>{citations} citations</span>
+              <span className={styles.metaText}>
+                {t("card.citations", { count: citations ?? "0" })}
+              </span>
             </div>
 
             <h2 id={titleId} className={styles.title}>{paper.title}</h2>
@@ -91,7 +96,7 @@ export function PaperDetailModal({ paper, onClose }: Props) {
                 className={styles.closeBtn}
                 onClick={onClose}
               >
-                Kapat
+                {t("modal.close")}
               </button>
               <a
                 className={styles.openBtn}
@@ -99,7 +104,7 @@ export function PaperDetailModal({ paper, onClose }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {sourceLabel[paper.source]}
+                {t(sourceLabelKey[paper.source])}
               </a>
             </div>
           </motion.div>

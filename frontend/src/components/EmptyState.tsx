@@ -1,3 +1,5 @@
+import { useI18n } from "../i18n/context";
+import type { MessageKey } from "../i18n/translations";
 import styles from "./EmptyState.module.css";
 
 interface Props {
@@ -6,10 +8,10 @@ interface Props {
   onRetry?: () => void;
 }
 
-const DEFAULTS: Record<Props["kind"], string> = {
-  idle: "Bir konu ara — örn. \"transformer attention\" ya da \"graph neural networks\".",
-  empty: "Sonuç bulunamadı. Farklı bir sorgu ya da arama modu dene.",
-  error: "Arama başarısız oldu.",
+const DEFAULT_KEYS: Record<Props["kind"], MessageKey> = {
+  idle: "empty.idle",
+  empty: "empty.empty",
+  error: "empty.error",
 };
 
 function StateIcon({ kind }: { kind: Props["kind"] }) {
@@ -40,7 +42,8 @@ function StateIcon({ kind }: { kind: Props["kind"] }) {
 }
 
 export function EmptyState({ kind, message, onRetry }: Props) {
-  const text = message ?? DEFAULTS[kind];
+  const { t } = useI18n();
+  const text = message ?? t(DEFAULT_KEYS[kind]);
   const kindClass = styles[kind] as string;
   return (
     <div className={styles.wrapper}>
@@ -50,7 +53,7 @@ export function EmptyState({ kind, message, onRetry }: Props) {
       <p className={`${styles.message} ${kindClass}`}>{text}</p>
       {kind === "error" && onRetry && (
         <button type="button" className={styles.retryBtn} onClick={onRetry}>
-          Tekrar dene
+          {t("empty.retry")}
         </button>
       )}
     </div>

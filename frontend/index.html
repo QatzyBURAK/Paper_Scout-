@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paper Scout</title>
+    <!-- Kayıtlı temayı React mount olmadan önce uygula: ilk boyamada tema sıçraması olmasın. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("paper-scout-theme");
+          if (t && t !== "system") {
+            document.documentElement.setAttribute("data-theme", t);
+          }
+        } catch (e) {
+          /* localStorage kapalıysa sistem tercihi geçerli kalır */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

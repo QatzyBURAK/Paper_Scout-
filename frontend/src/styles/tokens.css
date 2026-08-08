@@ -1,12 +1,25 @@
 /* =============================================================
-   Paper Scout — Design Tokens (Option A: Ink & Paper)
-   Dark-mode candidate (Option B: Slate Terminal) noted below.
+   Paper Scout — Design Tokens
    ALL components must reference these vars — no raw hex values.
+
+   Tema sistemi:
+   - :root                      → Ink & Paper (varsayılan açık tema)
+   - @media prefers-color-scheme→ sistem koyu ise Slate Terminal
+   - [data-theme="..."]         → kullanıcının elle seçtiği tema
+                                  (media query'den SONRA geldiği için onu ezer)
+
+   Paletler Figma Color Combinations kütüphanesindeki kombinasyonlardan
+   uyarlanmıştır: https://www.figma.com/resource-library/color-combinations/
+
+   Yeni tema eklerken: aşağıdaki --color-* setinin TAMAMINI tanımla,
+   sonra useTheme.ts içindeki THEME_SECTIONS dizisine bir kayıt ekle.
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
+  color-scheme: light;
+
   /* --- Color: Surfaces --- */
   --color-bg:          #f7f6f2;
   --color-surface:     #ffffff;
@@ -105,9 +118,13 @@
   --z-toast:   200;
 }
 
-/* Dark mode — auto via OS preference */
+/* =============================================================
+   Sistem tercihi: OS koyu moddaysa ve kullanıcı elle tema
+   seçmediyse Slate Terminal uygulanır.
+   ============================================================= */
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
     --color-bg:            #0f172a;
     --color-surface:       #1e293b;
     --color-surface-2:     #263244;
@@ -139,8 +156,46 @@
   }
 }
 
-/* Manual override: add data-theme="dark" to <html> to force dark mode */
+/* =============================================================
+   KLASİK — projenin özgün iki teması
+   ============================================================= */
+
+/* --- Kağıt & Mürekkep — sıcak parşömen + prusya mavisi (varsayılan) --- */
+[data-theme="ink"] {
+  color-scheme: light;
+  --color-bg:            #f7f6f2;
+  --color-surface:       #ffffff;
+  --color-surface-2:     #f0efe9;
+  --color-border:        #e4e2da;
+  --color-border-subtle: #edece6;
+  --color-text:          #1c1917;
+  --color-text-muted:    #57534e;
+  --color-text-faint:    #737373;
+  --color-accent:        #1e3a8a;
+  --color-accent-hover:  #172554;
+  --color-accent-light:  #eff6ff;
+  --color-accent-muted:  #bfdbfe;
+  --color-scrim:         rgb(0 0 0 / 0.4);
+  --color-header-bg:     rgb(255 255 255 / 0.85);
+  --color-success:       #16a34a;
+  --color-success-light: #f0fdf4;
+  --color-success-border:#bbf7d0;
+  --color-warning:       #d97706;
+  --color-error:         #dc2626;
+  --color-error-light:   #fef2f2;
+  --color-error-border:  #fecaca;
+  --color-arxiv-bg:      #fef3c7;
+  --color-arxiv-text:    #92400e;
+  --color-ss-bg:         #e0e7ff;
+  --color-ss-text:       #3730a3;
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+}
+
+/* --- Slate Terminal — nötr arduvaz + gök mavisi --- */
 [data-theme="dark"] {
+  color-scheme: dark;
   --color-bg:            #0f172a;
   --color-surface:       #1e293b;
   --color-surface-2:     #263244;
@@ -148,12 +203,13 @@
   --color-border-subtle: #2d3f55;
   --color-text:          #e2e8f0;
   --color-text-muted:    #94a3b8;
-  --color-text-faint:    #64748b;
+  --color-text-faint:    #94a3b8;
   --color-accent:        #38bdf8;
   --color-accent-hover:  #7dd3fc;
   --color-accent-light:  #0c2340;
   --color-accent-muted:  rgb(56 189 248 / 0.25);
   --color-scrim:         rgb(0 0 0 / 0.65);
+  --color-header-bg:     rgb(30 41 59 / 0.85);
   --color-success:       #4ade80;
   --color-success-light: #052e16;
   --color-success-border:#166534;
@@ -168,4 +224,292 @@
   --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.4);
   --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.4);
   --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+}
+
+/* =============================================================
+   Figma — Yacht Club (Neutral #59) · AÇIK
+   Lacivert + kırık beyaz + kum
+   ============================================================= */
+[data-theme="yacht"] {
+  color-scheme: light;
+  --color-bg:            #f4f6f8;
+  --color-surface:       #ffffff;
+  --color-surface-2:     #e8edf2;
+  --color-border:        #d3dce4;
+  --color-border-subtle: #e1e8ee;
+  --color-text:          #0b1f33;
+  --color-text-muted:    #34506b;  /* 8.4:1 on white */
+  --color-text-faint:    #5c7186;  /* 5.0:1 on white */
+  --color-accent:        #14507d;  /* 8.5:1 on white */
+  --color-accent-hover:  #0d3a5c;
+  --color-accent-light:  #eef4fa;
+  --color-accent-muted:  #b9d3e8;
+  --color-scrim:         rgb(11 31 51 / 0.45);
+  --color-header-bg:     rgb(255 255 255 / 0.85);
+  --color-success:       #15803d;
+  --color-success-light: #f0fdf4;
+  --color-success-border:#bbf7d0;
+  --color-warning:       #b45309;
+  --color-error:         #dc2626;
+  --color-error-light:   #fef2f2;
+  --color-error-border:  #fecaca;
+  --color-arxiv-bg:      #fdf0d5;
+  --color-arxiv-text:    #8a5a12;
+  --color-ss-bg:         #dfe9f5;
+  --color-ss-text:       #1c456e;
+  --shadow-xs:  0 1px 2px 0 rgb(11 31 51 / 0.06);
+  --shadow-sm:  0 1px 3px 0 rgb(11 31 51 / 0.10), 0 1px 2px -1px rgb(11 31 51 / 0.07);
+  --shadow-md:  0 4px 6px -1px rgb(11 31 51 / 0.10), 0 2px 4px -2px rgb(11 31 51 / 0.07);
+}
+
+/* =============================================================
+   Figma — Cappuccino (Neutral #64) · AÇIK
+   Krem-latte zemin + kavrulmuş kahve aksanı
+   ============================================================= */
+[data-theme="cappuccino"] {
+  color-scheme: light;
+  --color-bg:            #f6f0e8;
+  --color-surface:       #fffcf8;
+  --color-surface-2:     #efe5d9;
+  --color-border:        #ddcdb9;
+  --color-border-subtle: #e9dccc;
+  --color-text:          #2e2119;
+  --color-text-muted:    #6b4f38;  /* 7.3:1 on surface */
+  --color-text-faint:    #77644d;  /* 5.5:1 on surface, 5.0:1 on bg — WCAG AA */
+  --color-accent:        #8a4b1e;  /* 6.6:1 on surface */
+  --color-accent-hover:  #763c15;
+  --color-accent-light:  #fdf6ee;
+  --color-accent-muted:  #e8ccae;
+  --color-scrim:         rgb(46 33 25 / 0.45);
+  --color-header-bg:     rgb(255 252 248 / 0.85);
+  --color-success:       #15803d;
+  --color-success-light: #f0fdf4;
+  --color-success-border:#bbf7d0;
+  --color-warning:       #b45309;
+  --color-error:         #dc2626;
+  --color-error-light:   #fef2f2;
+  --color-error-border:  #fecaca;
+  --color-arxiv-bg:      #fbeacb;
+  --color-arxiv-text:    #8a5a12;
+  --color-ss-bg:         #e3e2f5;
+  --color-ss-text:       #3b3a80;
+  --shadow-xs:  0 1px 2px 0 rgb(46 33 25 / 0.06);
+  --shadow-sm:  0 1px 3px 0 rgb(46 33 25 / 0.10), 0 1px 2px -1px rgb(46 33 25 / 0.07);
+  --shadow-md:  0 4px 6px -1px rgb(46 33 25 / 0.10), 0 2px 4px -2px rgb(46 33 25 / 0.07);
+}
+
+/* =============================================================
+   Figma — Neon Noir (Vibrant #51) · KOYU
+   Neredeyse siyah + elektrik camgöbeği
+   ============================================================= */
+[data-theme="noir"] {
+  color-scheme: dark;
+  --color-bg:            #08090d;
+  --color-surface:       #121419;
+  --color-surface-2:     #1b1e26;
+  --color-border:        #2b2f3a;
+  --color-border-subtle: #23262f;
+  --color-text:          #e8eaf0;
+  --color-text-muted:    #a0a6b8;
+  --color-text-faint:    #9096a8;  /* 6.2:1 on surface */
+  --color-accent:        #22d3ee;
+  --color-accent-hover:  #67e8f9;
+  --color-accent-light:  #06232b;
+  --color-accent-muted:  rgb(34 211 238 / 0.25);
+  --color-scrim:         rgb(0 0 0 / 0.7);
+  --color-header-bg:     rgb(18 20 25 / 0.85);
+  --color-success:       #4ade80;
+  --color-success-light: #052e16;
+  --color-success-border:#166534;
+  --color-warning:       #fbbf24;
+  --color-error:         #f87171;
+  --color-error-light:   #2d0707;
+  --color-error-border:  #7f1d1d;
+  --color-arxiv-bg:      #3a2206;
+  --color-arxiv-text:    #fcd34d;
+  --color-ss-bg:         #1b1b4d;
+  --color-ss-text:       #a5b4fc;
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.6), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+}
+
+/* =============================================================
+   Figma — Emerald Odyssey (Tranquil #80) · KOYU
+   Derin zümrüt + yeşim aksanı
+   ============================================================= */
+[data-theme="emerald"] {
+  color-scheme: dark;
+  --color-bg:            #04140f;
+  --color-surface:       #0b241c;
+  --color-surface-2:     #103026;
+  --color-border:        #1c4a3a;
+  --color-border-subtle: #173e31;
+  --color-text:          #d7f5e6;
+  --color-text-muted:    #86c9ac;
+  --color-text-faint:    #7dbda2;
+  --color-accent:        #34d399;
+  --color-accent-hover:  #6ee7b7;
+  --color-accent-light:  #032b20;
+  --color-accent-muted:  rgb(52 211 153 / 0.25);
+  --color-scrim:         rgb(0 0 0 / 0.68);
+  --color-header-bg:     rgb(11 36 28 / 0.85);
+  --color-success:       #4ade80;
+  --color-success-light: #052e16;
+  --color-success-border:#166534;
+  --color-warning:       #fbbf24;
+  --color-error:         #f87171;
+  --color-error-light:   #2d0707;
+  --color-error-border:  #7f1d1d;
+  --color-arxiv-bg:      #3a2206;
+  --color-arxiv-text:    #fcd34d;
+  --color-ss-bg:         #10284a;
+  --color-ss-text:       #93c5fd;
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.45);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.55), 0 1px 2px -1px rgb(0 0 0 / 0.45);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.45);
+}
+
+/* =============================================================
+   Figma — Cherry Blossom (Romantic #24) · AÇIK
+   Yumuşak kiraz çiçeği pembesi
+   ============================================================= */
+[data-theme="blossom"] {
+  color-scheme: light;
+  --color-bg:            #fdf3f5;
+  --color-surface:       #ffffff;
+  --color-surface-2:     #fbe6ea;
+  --color-border:        #f4cfd7;
+  --color-border-subtle: #f8dde3;
+  --color-text:          #45202b;
+  --color-text-muted:    #8d3c52;  /* 7.1:1 on white */
+  --color-text-faint:    #99566a;  /* 5.4:1 on white */
+  --color-accent:        #c02a56;  /* 5.7:1 on white */
+  --color-accent-hover:  #9c2246;
+  --color-accent-light:  #fdf2f5;
+  --color-accent-muted:  #f9c9d6;
+  --color-scrim:         rgb(69 32 43 / 0.45);
+  --color-header-bg:     rgb(255 255 255 / 0.85);
+  --color-success:       #15803d;
+  --color-success-light: #f0fdf4;
+  --color-success-border:#bbf7d0;
+  --color-warning:       #b45309;
+  --color-error:         #dc2626;
+  --color-error-light:   #fef2f2;
+  --color-error-border:  #fecaca;
+  --color-arxiv-bg:      #fdefd6;
+  --color-arxiv-text:    #8a5a12;
+  --color-ss-bg:         #ece7fb;
+  --color-ss-text:       #55299c;
+  --shadow-xs:  0 1px 2px 0 rgb(69 32 43 / 0.06);
+  --shadow-sm:  0 1px 3px 0 rgb(69 32 43 / 0.10), 0 1px 2px -1px rgb(69 32 43 / 0.07);
+  --shadow-md:  0 4px 6px -1px rgb(69 32 43 / 0.10), 0 2px 4px -2px rgb(69 32 43 / 0.07);
+}
+
+/* =============================================================
+   Figma — Lavender Fields (Romantic #14) · AÇIK
+   Lavanta tarlası: açık lila + menekşe
+   ============================================================= */
+[data-theme="lavender"] {
+  color-scheme: light;
+  --color-bg:            #f6f4fc;
+  --color-surface:       #ffffff;
+  --color-surface-2:     #ece7f9;
+  --color-border:        #dcd3f0;
+  --color-border-subtle: #e6e0f5;
+  --color-text:          #2c1a4d;
+  --color-text-muted:    #5a3596;  /* 8.0:1 on white */
+  --color-text-faint:    #6f5f94;  /* 5.6:1 on white, 5.2:1 on bg — WCAG AA */
+  --color-accent:        #6d3fc4;  /* 6.7:1 on white */
+  --color-accent-hover:  #572fa3;
+  --color-accent-light:  #f4f0fd;
+  --color-accent-muted:  #d8c9f5;
+  --color-scrim:         rgb(44 26 77 / 0.45);
+  --color-header-bg:     rgb(255 255 255 / 0.85);
+  --color-success:       #15803d;
+  --color-success-light: #f0fdf4;
+  --color-success-border:#bbf7d0;
+  --color-warning:       #b45309;
+  --color-error:         #dc2626;
+  --color-error-light:   #fef2f2;
+  --color-error-border:  #fecaca;
+  --color-arxiv-bg:      #fdf0d5;
+  --color-arxiv-text:    #8a5a12;
+  --color-ss-bg:         #e4dcfa;
+  --color-ss-text:       #4c2b8f;
+  --shadow-xs:  0 1px 2px 0 rgb(44 26 77 / 0.06);
+  --shadow-sm:  0 1px 3px 0 rgb(44 26 77 / 0.10), 0 1px 2px -1px rgb(44 26 77 / 0.07);
+  --shadow-md:  0 4px 6px -1px rgb(44 26 77 / 0.10), 0 2px 4px -2px rgb(44 26 77 / 0.07);
+}
+
+/* =============================================================
+   Figma — Evening Rose (Romantic #25) · KOYU
+   Koyu bordo-mor + gül pembesi
+   ============================================================= */
+[data-theme="eveningrose"] {
+  color-scheme: dark;
+  --color-bg:            #1a0e14;
+  --color-surface:       #2a1720;
+  --color-surface-2:     #361d29;
+  --color-border:        #4d2a3a;
+  --color-border-subtle: #422433;
+  --color-text:          #fce7ef;
+  --color-text-muted:    #d5a8bd;
+  --color-text-faint:    #c99bb1;
+  --color-accent:        #f9a8d4;
+  --color-accent-hover:  #fbcfe8;
+  --color-accent-light:  #3d1526;
+  --color-accent-muted:  rgb(249 168 212 / 0.25);
+  --color-scrim:         rgb(0 0 0 / 0.68);
+  --color-header-bg:     rgb(42 23 32 / 0.85);
+  --color-success:       #4ade80;
+  --color-success-light: #052e16;
+  --color-success-border:#166534;
+  --color-warning:       #fbbf24;
+  --color-error:         #f87171;
+  --color-error-light:   #2d0707;
+  --color-error-border:  #7f1d1d;
+  --color-arxiv-bg:      #402507;
+  --color-arxiv-text:    #fcd34d;
+  --color-ss-bg:         #2b1a4d;
+  --color-ss-text:       #c4b5fd;
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.45);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.55), 0 1px 2px -1px rgb(0 0 0 / 0.45);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.45);
+}
+
+/* =============================================================
+   Figma — Space Berries (Vibrant #48) · KOYU
+   Derin uzay moru + böğürtlen aksanı
+   ============================================================= */
+[data-theme="spaceberry"] {
+  color-scheme: dark;
+  --color-bg:            #100a24;
+  --color-surface:       #1c1440;
+  --color-surface-2:     #251a52;
+  --color-border:        #3b2a75;
+  --color-border-subtle: #332468;
+  --color-text:          #e9e4ff;
+  --color-text-muted:    #b4a8e6;
+  --color-text-faint:    #a89be0;
+  --color-accent:        #a78bfa;
+  --color-accent-hover:  #c4b5fd;
+  --color-accent-light:  #241a52;
+  --color-accent-muted:  rgb(167 139 250 / 0.25);
+  --color-scrim:         rgb(0 0 0 / 0.68);
+  --color-header-bg:     rgb(28 20 64 / 0.85);
+  --color-success:       #4ade80;
+  --color-success-light: #052e16;
+  --color-success-border:#166534;
+  --color-warning:       #fbbf24;
+  --color-error:         #f87171;
+  --color-error-light:   #2d0707;
+  --color-error-border:  #7f1d1d;
+  --color-arxiv-bg:      #402507;
+  --color-arxiv-text:    #fcd34d;
+  --color-ss-bg:         #2b1a5c;
+  --color-ss-text:       #c4b5fd;
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.45);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.55), 0 1px 2px -1px rgb(0 0 0 / 0.45);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.45);
 }

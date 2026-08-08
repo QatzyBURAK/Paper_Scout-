@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { Paper } from "../types/paper";
 import { PaperCard } from "./PaperCard";
+import { useI18n } from "../i18n/context";
 import styles from "./ResultsList.module.css";
 
 const container: Variants = {
@@ -21,10 +22,11 @@ interface Props {
 }
 
 export function ResultsList({ papers, total, onSelect }: Props) {
+  const { t } = useI18n();
   const displayCount = total ?? papers.length;
   return (
     <div>
-      <p className={styles.count}>{displayCount} sonuç</p>
+      <p className={styles.count}>{t("results.count", { count: displayCount })}</p>
       <motion.div
         className={styles.list}
         variants={container}
